@@ -1,21 +1,18 @@
 //
-//  ViewController.m
+//  GameType1ViewController.m
 //  Dos
 //
-//  Created by Arman Aydemir on 7/2/14.
+//  Created by Arman Aydemir on 7/25/14.
 //  Copyright (c) 2014 Arman Aydemir. All rights reserved.
 //
-//  Multiple Game Types
-//  Overall UI
-//  Lastly: Connectitivity (talentoday.com)
 
-#import "ViewController.h"
+#import "GameType1ViewController.h"
 
-@interface ViewController ()
+@interface GameType1ViewController ()
 
 @end
 
-@implementation ViewController
+@implementation GameType1ViewController
 
 - (void)viewDidLoad
 {
@@ -26,8 +23,9 @@
     self.redButton.backgroundColor = [UIColor redColor];
     self.blueButton.titleLabel.font = [UIFont systemFontOfSize: 36];
     self.redButton.titleLabel.font = [UIFont systemFontOfSize: 36];
-    self.HighScoreLabel.text = [NSString stringWithFormat:@"%li", (long)[[NSUserDefaults standardUserDefaults] integerForKey:@"Highscore"]];
+    self.HighScoreLabel.text = [NSString stringWithFormat:@"%li", (long)[[NSUserDefaults standardUserDefaults] integerForKey:@"Highscore1"]];
     self.retry.hidden = true;
+    self.stopGame = false;
     self.menuButton.hidden = true;
     self.stopCounter = true;
     self.stopFader = true;
@@ -38,6 +36,7 @@
     [self.retry addTarget:self action:@selector(didRetry) forControlEvents:UIControlEventTouchUpInside];
     [self.blueButton addTarget:self action:@selector(didTapBlue) forControlEvents:UIControlEventTouchUpInside];
     [self.redButton addTarget:self action:@selector(didTapRed) forControlEvents:UIControlEventTouchUpInside];
+    [self animateProgressView2];
     [self reset];}
 
 
@@ -58,15 +57,16 @@
 
 -(void)animateProgressView2
 {
-
+    
     self.timer = [NSTimer scheduledTimerWithTimeInterval: 0.1f target: self selector: @selector(updateProgressBar)
-                  userInfo: nil repeats: YES];
+                                                userInfo: nil repeats: YES];
 }
 
 - (void)reset
 {
     [self preferredStatusBarStyle];
     self.retry.hidden = true;
+    self.stopGame = false;
     self.menuButton.hidden = true;
     self.stopCounter = true;
     self.stopFader = true;
@@ -82,9 +82,6 @@
     self.redCol1 = 250;
     self.redCol2 = 0;
     self.redCol3 = 0;
-    self.timerView.progress = 0.0f;
-    self.time = 0.0f;
-    [self animateProgressView2];
 }
 
 - (void)failer
@@ -93,15 +90,16 @@
         self.retry.tintColor = [UIColor blackColor];
     }else{
         self.retry.tintColor = [UIColor whiteColor];
-
+        
     }
-    if (self.streak >= [[NSUserDefaults standardUserDefaults] integerForKey:@"Highscore"]){
-        [[NSUserDefaults standardUserDefaults] setInteger:self.streak forKey:@"Highscore"];
+    if (self.streak >= [[NSUserDefaults standardUserDefaults] integerForKey:@"Highscore1"]){
+        [[NSUserDefaults standardUserDefaults] setInteger:self.streak forKey:@"Highscore1"];
         [[NSUserDefaults standardUserDefaults] synchronize];
-        self.HighScoreLabel.text = [NSString stringWithFormat:@"%li", (long)[[NSUserDefaults standardUserDefaults] integerForKey:@"Highscore"]];
+        self.HighScoreLabel.text = [NSString stringWithFormat:@"%li", (long)[[NSUserDefaults standardUserDefaults] integerForKey:@"Highscore1"]];
     }
     self.stopCounter = false;
     self.retry.hidden = false;
+    self.stopGame = true;
     self.menuButton.hidden = false;
     self.stopFader = false;
     self.streak = 0;
@@ -159,44 +157,40 @@
 
 - (void)streakText
 {
-    self.streakLabel.text = [NSString stringWithFormat:@"Streak: %li", (long)self.streak];
+    self.streakLabel.text = [NSString stringWithFormat:@"Points: %li", (long)self.streak];
 }
 
 
 - (void)didTapBlue
 {
-    if ([self.retry isHidden ])
+    if (self.stopGame == false)
     {
-    BOOL backgroundIsWhite = self.view.backgroundColor == [UIColor whiteColor];
-    BOOL isLarger = [self.blueButton.titleLabel.text integerValue] > [self.redButton.titleLabel.text integerValue];
-    if ((backgroundIsWhite && isLarger) || (!backgroundIsWhite && !isLarger)){
-        self.streak++;
+        BOOL backgroundIsWhite = self.view.backgroundColor == [UIColor whiteColor];
+        BOOL isLarger = [self.blueButton.titleLabel.text integerValue] > [self.redButton.titleLabel.text integerValue];
+        if ((backgroundIsWhite && isLarger) || (!backgroundIsWhite && !isLarger)){
+            self.streak++;
+        }
         [self reset];
-    }else{
-        [self failer];
-    }
     }
 }
 
 - (void)didTapRed
 {
-    if ([self.retry isHidden ])
+    if (self.stopGame == false)
     {
-    BOOL backgroundIsWhite = self.view.backgroundColor == [UIColor whiteColor];
-    BOOL isLarger = [self.redButton.titleLabel.text integerValue] > [self.blueButton.titleLabel.text integerValue];
-    if ((backgroundIsWhite && isLarger) || (!backgroundIsWhite && !isLarger)){
-        self.streak++;
+        BOOL backgroundIsWhite = self.view.backgroundColor == [UIColor whiteColor];
+        BOOL isLarger = [self.redButton.titleLabel.text integerValue] > [self.blueButton.titleLabel.text integerValue];
+        if ((backgroundIsWhite && isLarger) || (!backgroundIsWhite && !isLarger)){
+            self.streak++;
+        }
         [self reset];
-    }else{
-        self.streak = 0;
-        [self failer];
-    }
     }
 }
 
 - (void)didRetry{
     self.streak = 0;
     self.stopFader = true;
+    self.time = 0.0f;
     [self reset];
 }
 
@@ -204,9 +198,9 @@
 - (void)animateRetry{
     [self.timerFade invalidate];
     self.timerFade = [NSTimer scheduledTimerWithTimeInterval: 0.05f target: self selector: @selector(updateFader)
-                      userInfo: nil repeats: YES];
+                                                    userInfo: nil repeats: YES];
 }
-    
+
 - (void)updateFader{
     if (!self.stopFader){
         
@@ -242,4 +236,6 @@
         }
     }
 }
+
+
 @end

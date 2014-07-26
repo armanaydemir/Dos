@@ -24,6 +24,8 @@
 
 @property (weak, nonatomic) IBOutlet UILabel *HighScoreLabel;
 
+@property (nonatomic) BOOL stopGame;
+
 @property (weak, nonatomic) NSTimer *timer;
 
 @property (weak, nonatomic) NSTimer *timerFade;
